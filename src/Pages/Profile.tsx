@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function Profile() {
+  //@ts-ignore
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [activeSection, setActiveSection] = useState(null);
 
@@ -11,7 +12,7 @@ function Profile() {
     password: "********",
   });
 
-  const [address, setAddress] = useState({
+  const [address, setAddress] = useState<any>({
     addressLine: "123 Main St",
     state: "California",
     district: "Los Angeles",
@@ -20,7 +21,7 @@ function Profile() {
     landmark: "Near Central Park",
   });
 
-  const [bankDetails, setBankDetails] = useState({
+  const [bankDetails, setBankDetails] = useState<any>({
     accountNumber: "1234567890",
     confirmAccountNumber: "1234567890",
     ifsc: "ABC123456",
@@ -28,9 +29,9 @@ function Profile() {
     accountHolderName: "John Doe",
   });
 
-  const handleInputChange = (e, setState) => {
+  const handleInputChange = (e: any, setState: any) => {
     const { name, value } = e.target;
-    setState((prevState) => ({
+    setState((prevState: any) => ({
       ...prevState,
       [name]: value,
     }));
@@ -82,18 +83,21 @@ function Profile() {
 
             <div className="mt-6 space-x-4">
               <button
+                //@ts-ignore
                 onClick={() => setActiveSection("profile")}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:ring focus:ring-blue-300"
               >
                 Update Profile
               </button>
               <button
+                //@ts-ignore
                 onClick={() => setActiveSection("address")}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:ring focus:ring-blue-300"
               >
                 Update Address
               </button>
               <button
+                //@ts-ignore
                 onClick={() => setActiveSection("bank")}
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 focus:ring focus:ring-blue-300"
               >

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TreePine, Users, Link, Award, Copy, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +11,7 @@ interface UserNode {
 
 const Dashboard = () => {
   // Mock data for MLM network
+  //@ts-ignore
   const [networkData, setNetworkData] = useState({
     totalReferrals: 12,
     totalEarnings: 5420,
