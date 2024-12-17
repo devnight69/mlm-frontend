@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../apis/axiosInstance";
 import { ClipLoader } from "react-spinners";
-import { toast, ToastContainer } from "react-toastify"; // Update import
+import { toast } from "react-toastify"; // Update import
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch } from "react-redux";
 import { setAuthSlice } from "../redux/slices/AuthSlice";

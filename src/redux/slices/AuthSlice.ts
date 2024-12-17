@@ -16,6 +16,7 @@ const AuthSlice = createSlice({
         }
       });
     },
+    //@ts-ignore
     resetAuthSlice(state) {
       return initialState;
     },
