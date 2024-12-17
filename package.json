@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "proxy": "https://mlm-backend-mern.vercel.app",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -17,6 +18,8 @@
     "react-dom": "^18.3.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.0.2",
+    "react-spinners": "^0.15.0",
+    "react-toastify": "^11.0.0",
     "redux": "^5.0.1",
     "redux-persist": "^6.0.0"
   },

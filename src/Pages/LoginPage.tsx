@@ -1,41 +1,65 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ClipLoader } from "react-spinners";
+import axiosInstance from "../apis/axiosInstance";
+import { useDispatch } from "react-redux";
+import { setAuthSlice } from "../redux/slices/AuthSlice";
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     usernameOrEmail: "",
     password: "",
   });
 
+  // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    // Handle login logic here
+  const dispatch = useDispatch();
+
+  // Handle login logic
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent page reload
+    setIsLoading(true);
+
+    try {
+      const response = await axiosInstance.post("/auth/login", {
+        username: formData.usernameOrEmail,
+        password: formData.password,
+      });
+
+      if (response?.data?.response) {
+        localStorage.setItem("token", response?.data?.token);
+        dispatch(setAuthSlice({ userDetails: response?.data?.data }));
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.log(error);
+      toast.error(error?.response?.data?.data || "Something went wrong!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="bg-gray-50 min-h-screen flex items-center justify-center">
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
-        {/* Title */}
         <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
           Login
         </h1>
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username or Email */}
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label
               htmlFor="usernameOrEmail"
               className="block text-sm font-medium text-gray-700"
             >
-              Username or Email
+              Phone Number
             </label>
             <input
               type="text"
@@ -43,13 +67,12 @@ const LoginPage = () => {
               name="usernameOrEmail"
               value={formData.usernameOrEmail}
               onChange={handleInputChange}
-              placeholder="Enter your username or email"
+              placeholder="Enter your phone number"
               className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-gray-700"
               required
             />
           </div>
 
-          {/* Password */}
           <div>
             <label
               htmlFor="password"
@@ -69,36 +92,29 @@ const LoginPage = () => {
             />
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              disabled={isLoading}
+              className={`w-full flex items-center justify-center px-4 py-2 rounded-md shadow focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                isLoading
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
             >
-              Login
+              {isLoading ? <ClipLoader color="#ffffff" size={20} /> : "Login"}
             </button>
           </div>
         </form>
 
-        {/* Additional Links */}
         <div className="mt-4 text-sm text-center text-gray-600">
           <p>
             Don't have an account?{" "}
             <a
-              // href="/register"
               onClick={() => navigate("/register")}
               className="text-blue-500 hover:underline focus:outline-none cursor-pointer"
             >
               Register here
-            </a>
-          </p>
-          <p className="mt-2">
-            Forgot your password?{" "}
-            <a
-              href="/reset-password"
-              className="text-blue-500 hover:underline focus:outline-none"
-            >
-              Reset it
             </a>
           </p>
         </div>

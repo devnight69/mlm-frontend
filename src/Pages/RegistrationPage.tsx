@@ -1,296 +1,195 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../apis/axiosInstance";
+import { ClipLoader } from "react-spinners";
+import { toast, ToastContainer } from "react-toastify"; // Update import
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import { setAuthSlice } from "../redux/slices/AuthSlice";
 
 const RegistrationPage = () => {
   const [step, setStep] = useState(1);
   const [referralId, setReferralId] = useState("");
   const [referrerDetails, setReferrerDetails] = useState<any>(null);
   const [formData, setFormData] = useState<any>({
-    userName: "",
-    mobile: "",
+    name: "",
+    mobileNumber: "",
     email: "",
-    gender: "",
-    dob: null,
+    password: "",
+    confirmPassword: "",
+    referralCode: "",
   });
   const [pin, setPin] = useState("");
-  const [confirmPin, setConfirmPin] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Mock function to simulate fetching referrer details
-  const fetchReferrerDetails = async (id: any) => {
-    // In a real app, this would be an API call
-    const mockReferrerData: any = {
-      REF123: {
-        name: "John Doe",
-        age: 28,
-        photo:
-          "https://imgs.search.brave.com/_z8B4TvuD_6x3QEYEYB-n2rSUnSQO2-q5kd4UybnNp0/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/ZnJlZS1waG90by9z/bWlsZXktbWFuLXJl/bGF4aW5nLW91dGRv/b3JzXzIzLTIxNDg3/MzkzMzQuanBnP3Nl/bXQ9YWlzX2h5YnJp/ZA",
-        gender: "Male",
-        contact: "+1 (555) 123-4567",
-      },
-    };
-
-    return mockReferrerData[id] || null;
-  };
-
+  // Fetch referral details from the API
   const handleReferralSubmit = async () => {
-    const details = await fetchReferrerDetails(referralId);
-    if (details) {
-      setReferrerDetails(details);
-      setStep(2);
-    } else {
-      alert("Invalid Referral ID");
+    setIsLoading(true);
+    try {
+      const response: any = await axiosInstance.get(
+        `/auth/user/name/${referralId}`
+      );
+      if (response?.data?.response) {
+        setReferrerDetails(response?.data?.data);
+        setFormData({ ...formData, referralCode: referralId });
+        setStep(2);
+      } else {
+        toast.error("Invalid Referral ID. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Invalid Referral ID. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRegistrationSubmit = () => {
-    // Validate form data
-    const { userName, mobile, email, gender, dob } = formData;
-    if (!userName || !mobile || !email || !gender || !dob) {
-      alert("Please fill all details");
+  const dispatch = useDispatch();
+  // Validate form data and proceed
+  const handleRegistrationSubmit = async () => {
+    const { name, mobileNumber, email, password, confirmPassword } = formData;
+
+    if (!name || !mobileNumber || !email || !password || !confirmPassword) {
+      toast.warning("Please fill in all fields");
       return;
     }
-    setStep(4);
-  };
+    if (password !== confirmPassword) {
+      toast.warning("Passwords do not match");
+      return;
+    }
+    setIsLoading(true);
+    const payload = {
+      name: formData.name,
+      mobileNumber: formData.mobileNumber,
+      email: formData.email,
+      password: formData.password,
+      referralCode: formData.referralCode,
+      pin: pin,
+    };
 
-  const navigation = useNavigate();
-
-  const handlePinSubmit = () => {
-    if (pin === confirmPin) {
-      // Simulate successful registration
-      alert("Registration Successful!");
-      navigation("/dashboard");
-      // In a real app, redirect to dashboard
-      // router.push('/dashboard');
-    } else {
-      alert("PINs do not match");
+    try {
+      const response: any = await axiosInstance.post("/auth/register", payload);
+      if (response?.data?.response) {
+        toast.success("Registration Successful!");
+        dispatch(setAuthSlice({ userDetails: response?.data }));
+        navigate("/dashboard");
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md bg-white shadow-md rounded-lg">
+        {/* Step 1: Enter Referral ID */}
         {step === 1 && (
           <div className="p-6">
             <h2 className="text-2xl font-bold mb-4 text-center">
               Enter Referral ID
             </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="referralId"
-                >
-                  Referral ID
-                </label>
-                <input
-                  id="referralId"
-                  type="text"
-                  value={referralId}
-                  onChange={(e) => setReferralId(e.target.value)}
-                  placeholder="Enter Referral ID"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <button
-                onClick={handleReferralSubmit}
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Continue
-              </button>
-            </div>
+            <input
+              type="text"
+              value={referralId}
+              onChange={(e) => setReferralId(e.target.value)}
+              placeholder="Referral ID"
+              className="border rounded w-full p-2 mb-4"
+            />
+            <button
+              onClick={handleReferralSubmit}
+              className="w-full bg-blue-500 text-white p-2 rounded flex justify-center"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ClipLoader color="#ffffff" size={20} />
+              ) : (
+                "Continue"
+              )}
+            </button>
           </div>
         )}
 
+        {/* Step 2: Show Referrer Details */}
         {step === 2 && referrerDetails && (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              Referrer Details
-            </h2>
-            <div className="flex flex-col items-center space-y-4">
-              <img
-                src={referrerDetails.photo}
-                alt="Referrer"
-                className="w-32 h-32 rounded-full object-cover"
-              />
-              <div className="text-center">
-                <p>
-                  <strong>Name:</strong> {referrerDetails.name}
-                </p>
-                <p>
-                  <strong>Age:</strong> {referrerDetails.age}
-                </p>
-                <p>
-                  <strong>Gender:</strong> {referrerDetails.gender}
-                </p>
-                <p>
-                  <strong>Contact:</strong> {referrerDetails.contact}
-                </p>
-              </div>
-              <button
-                onClick={() => setStep(3)}
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Continue to Registration
-              </button>
-            </div>
+          <div className="p-6 text-center">
+            <p>
+              <strong>Name:</strong> {referrerDetails.name}
+            </p>
+            <button
+              onClick={() => setStep(3)}
+              className="w-full bg-blue-500 text-white p-2 rounded mt-4"
+            >
+              Continue to Registration
+            </button>
           </div>
         )}
 
+        {/* Step 3: User Details */}
         {step === 3 && (
           <div className="p-6">
             <h2 className="text-2xl font-bold mb-4 text-center">
               Registration Details
             </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="userName"
-                >
-                  Full Name
-                </label>
-                <input
-                  id="userName"
-                  type="text"
-                  value={formData.userName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, userName: e.target.value })
-                  }
-                  placeholder="Enter your full name"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="mobile"
-                >
-                  Mobile Number
-                </label>
-                <input
-                  id="mobile"
-                  type="tel"
-                  value={formData.mobile}
-                  onChange={(e) =>
-                    setFormData({ ...formData, mobile: e.target.value })
-                  }
-                  placeholder="Enter mobile number"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="email"
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  placeholder="Enter email"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="gender"
-                >
-                  Gender
-                </label>
-                <select
-                  id="gender"
-                  value={formData.gender}
-                  onChange={(e) =>
-                    setFormData({ ...formData, gender: e.target.value })
-                  }
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="dob"
-                >
-                  Date of Birth
-                </label>
-                <input
-                  id="dob"
-                  type="date"
-                  value={
-                    formData.dob ? formData.dob.toISOString().split("T")[0] : ""
-                  }
-                  onChange={(e) =>
-                    setFormData({ ...formData, dob: new Date(e.target.value) })
-                  }
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <button
-                onClick={handleRegistrationSubmit}
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Submit Registration Details
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              PIN Verification
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="pin"
-                >
-                  Enter PIN
-                </label>
-                <input
-                  id="pin"
-                  type="password"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  placeholder="Enter PIN"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <div>
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="confirmPin"
-                >
-                  Confirm PIN
-                </label>
-                <input
-                  id="confirmPin"
-                  type="password"
-                  value={confirmPin}
-                  onChange={(e) => setConfirmPin(e.target.value)}
-                  placeholder="Confirm PIN"
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </div>
-              <button
-                onClick={handlePinSubmit}
-                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-              >
-                Verify PIN
-              </button>
-            </div>
+            <input
+              placeholder="Name"
+              className="border rounded w-full p-2 mb-4"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+            />
+            <input
+              placeholder="Mobile Number"
+              className="border rounded w-full p-2 mb-4"
+              value={formData.mobileNumber}
+              onChange={(e) =>
+                setFormData({ ...formData, mobileNumber: e.target.value })
+              }
+            />
+            <input
+              placeholder="Email"
+              className="border rounded w-full p-2 mb-4"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
+            <input
+              placeholder="Password"
+              type="password"
+              className="border rounded w-full p-2 mb-4"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+            />
+            <input
+              placeholder="Confirm Password"
+              type="password"
+              className="border rounded w-full p-2 mb-4"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                setFormData({ ...formData, confirmPassword: e.target.value })
+              }
+            />
+            <input
+              placeholder="Enter PIN"
+              type="text"
+              className="border rounded w-full p-2 mb-4"
+              value={pin}
+              onChange={(e) => setPin(e.target.value)}
+            />
+            <button
+              onClick={handleRegistrationSubmit}
+              className="w-full bg-blue-500 text-white p-2 rounded flex justify-center"
+              disabled={isLoading}
+            >
+              {isLoading ? <ClipLoader color="#ffffff" size={20} /> : "Submit"}
+            </button>
           </div>
         )}
       </div>
