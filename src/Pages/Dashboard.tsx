@@ -54,7 +54,7 @@ const Dashboard = () => {
           <p className="text-sm text-gray-500">ID: {referral.id}</p>
         </div>
         <div className="text-right">
-          <p className="font-semibold text-green-600">${referral.earnings}</p>
+          <p className="font-semibold text-green-600">₹{referral.earnings}</p>
           <p className="text-xs text-gray-500">Level {referral.level}</p>
         </div>
       </div>
@@ -73,7 +73,7 @@ const Dashboard = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-green-600 font-semibold">
-                    ${subReferral.earnings}
+                    ₹{subReferral.earnings}
                   </p>
                   <p className="text-xs text-gray-500">
                     Level {subReferral.level}
@@ -92,8 +92,8 @@ const Dashboard = () => {
       const subReferralCount =
         level < 3 ? Math.floor(Math.random() * 5) + 1 : 0; // Limit depth to 3 levels
       return {
-        id: `User-${id}`,
-        name: `User ${id}`,
+        id: `User-₹{id}`,
+        name: `User ₹{id}`,
         earnings: Math.floor(Math.random() * 1000) + 100, // Random earnings
         subReferrals: subReferralCount
           ? Array.from({ length: subReferralCount }, (_, idx) =>
@@ -117,7 +117,7 @@ const Dashboard = () => {
             <h3 className="text-sm font-semibold text-gray-800">{node.name}</h3>
             <p className="text-xs text-gray-500">{node.id}</p>
             <span className="text-green-500 text-xs font-semibold">
-              ${node.earnings}
+              ₹{node.earnings}
             </span>
           </div>
           {/* Connecting Line */}
@@ -216,7 +216,7 @@ const Dashboard = () => {
             <div>
               <h2 className="text-xl font-bold">Total Earnings</h2>
               <p className="text-3xl font-extrabold text-green-600">
-                ${networkData.totalEarnings}
+                ₹{networkData.totalEarnings}
               </p>
             </div>
           </div>
