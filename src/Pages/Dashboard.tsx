@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { TreePine, Users, Link, Award, Copy, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store/rootReducer";
+import { toast } from "react-toastify";
 
 interface UserNode {
   id: string;
@@ -12,38 +15,22 @@ interface UserNode {
 const Dashboard = () => {
   // Mock data for MLM network
   //@ts-ignore
+  const profileDetails = useSelector(
+    (state: RootState) => state.AuthSlice.userDetails
+  );
+
   const [networkData, setNetworkData] = useState({
-    totalReferrals: 12,
-    totalEarnings: 5420,
-    currentLevel: 3,
-    networkTree: [
-      {
-        id: "REF001",
-        name: "John Doe",
-        level: 1,
-        earnings: 1200,
-        subReferrals: [
-          { id: "REF005", name: "Alice Smith", level: 2, earnings: 800 },
-          { id: "REF006", name: "Bob Johnson", level: 2, earnings: 750 },
-        ],
-      },
-      {
-        id: "REF002",
-        name: "Emma Wilson",
-        level: 1,
-        earnings: 1100,
-        subReferrals: [
-          { id: "REF007", name: "Charlie Brown", level: 2, earnings: 600 },
-          { id: "REF008", name: "David Lee", level: 2, earnings: 550 },
-        ],
-      },
-    ],
-    referralCode: "NETWORK123",
+    totalReferrals: 0,
+    totalEarnings: 0,
+    currentLevel: 0,
+    networkTree: [],
+    referralCode: profileDetails?.user?.referralCode,
   });
+
   const [showNetworkTree, setShowNetworkTree] = useState(false);
   const copyReferralCode = () => {
     navigator.clipboard.writeText(networkData.referralCode);
-    alert("Referral code copied!");
+    toast.success("Referral code copied!");
   };
 
   const ReferralNetworkNode = ({ referral }: any) => (
@@ -187,7 +174,7 @@ const Dashboard = () => {
           className="text-xl font-bold text-gray-800 cursor-pointer"
           onClick={() => navigate("/")}
         >
-          MLM Dashboard
+          Welcome, {profileDetails?.user?.name} | Expires in 35d
         </div>
 
         {/* Right: Profile Section */}
@@ -271,7 +258,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white shadow-md rounded-lg p-6 mt-6 text-center">
+        {/* <div className="bg-white shadow-md rounded-lg p-6 mt-6 text-center">
           <button
             onClick={() => setShowNetworkTree(true)}
             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center mx-auto"
@@ -279,7 +266,7 @@ const Dashboard = () => {
             <TreePine className="mr-2" size={24} />
             Visualize Full Network Hierarchy
           </button>
-        </div>
+        </div> */}
       </div>
       {showNetworkTree && (
         <NetworkTreeModal
