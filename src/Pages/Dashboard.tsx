@@ -19,6 +19,7 @@ const Dashboard = () => {
     (state: RootState) => state.AuthSlice.userDetails
   );
 
+  //@ts-ignore
   const [networkData, setNetworkData] = useState({
     totalReferrals: 0,
     totalEarnings: 0,
@@ -237,7 +238,7 @@ const Dashboard = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {networkData.networkTree.map((referral) => (
+            {networkData.networkTree.map((referral: any) => (
               <ReferralNetworkNode key={referral.id} referral={referral} />
             ))}
           </div>
