@@ -3,7 +3,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "../redux/store/rootReducer";
 import axiosInstance from "../apis/axiosInstance";
 import { toast } from "react-toastify";
-import { ClipLoader } from "react-spinners";
+import { BarLoader } from "react-spinners";
+import { useNavigate } from "react-router-dom";
+import { menuItems } from "./utils";
+import Sidebar from "../components/Sidebar";
 
 const PinManagement = () => {
   // State management
@@ -163,14 +166,44 @@ const PinManagement = () => {
     fetchPackages();
   };
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const navigate = useNavigate();
+  const profileDetails = useSelector(
+    (state: RootState) => state.AuthSlice.userDetails
+  );
+  const handleLogout = () => {
+    localStorage.clear();
+    toast.success("Logged out successfully!");
+    navigate("/login");
+  };
+
   return (
-    <>
+    <div className="flex min-h-screen bg-blue-50">
+      <div
+        className={`
+        fixed md:static z-50 inset-y-0 left-0 
+        w-64 bg-white shadow-2xl 
+        transform transition-transform duration-300
+        // ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0
+      `}
+      >
+        {isSidebarOpen && (
+          <Sidebar
+            menuItems={menuItems}
+            profileDetails={profileDetails}
+            setIsSidebarOpen={setIsSidebarOpen}
+            handleLogout={handleLogout}
+          />
+        )}
+      </div>
+
       {isLoading ? (
-        <div className="flex items-center justify-center h-screen">
-          <ClipLoader color="black" size={24} />
+        <div className="flex items-center justify-center h-screen w-screen">
+          <BarLoader color="black" />
         </div>
       ) : (
-        <div className="p-4 space-y-4">
+        <div className=" space-y-4 flex-grow p-6 overflow-y-auto">
           <div className="bg-white shadow rounded-lg">
             <div className="px-4 py-5 sm:px-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -398,7 +431,7 @@ const PinManagement = () => {
           )}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

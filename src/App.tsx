@@ -13,6 +13,10 @@ import Profile from "./Pages/Profile";
 import { ToastContainer } from "react-toastify";
 import PinManagement from "./Pages/PinManagement";
 import AboutUs from "./Pages/AboutUs";
+import Earnings from "./Pages/Earnings";
+import ReferralNetwork from "./Pages/ReferralNetwork";
+import WithdrawEarnings from "./Pages/WithdrawEarning";
+import WithdrawRequests from "./Pages/WithdrawRequests";
 
 // Authentication Context (you'll need to implement this)
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -73,6 +77,38 @@ function App() {
           element={
             <PrivateRoute>
               <PinManagement />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/earnings"
+          element={
+            <PrivateRoute>
+              <Earnings />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/referral-network"
+          element={
+            <PrivateRoute>
+              <ReferralNetwork />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/withdraw-earnings"
+          element={
+            <PrivateRoute>
+              <WithdrawEarnings />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/withdraw-requests"
+          element={
+            <PrivateRoute>
+              <WithdrawRequests />
             </PrivateRoute>
           }
         />
