@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BarLoader } from "react-spinners";
-import { ChevronDown, ChevronRight, Users } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, Users } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import axiosInstance from "../apis/axiosInstance";
 import { menuItems } from "./utils";
@@ -15,21 +15,24 @@ const TreeNode = ({
   onExpand,
   expandedNodes,
   loading,
+  isMobile,
 }: any) => {
   const isExpanded = expandedNodes.includes(user.referralCode);
   const hasChildren = user.referrals && user.referrals.length > 0;
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="relative">
+    <div className={`flex flex-col items-center ${isMobile ? "w-full" : ""}`}>
+      <div className="relative w-full">
         {/* Vertical line from parent */}
-        {level > 0 && (
+        {level > 0 && !isMobile && (
           <div className="absolute h-8 w-px bg-gray-300 -top-8 left-1/2 transform -translate-x-1/2" />
         )}
 
         {/* Node content */}
         <div
-          className="flex items-center space-x-2 py-2 px-4 cursor-pointer hover:bg-blue-50 rounded border border-gray-200 shadow-sm bg-white"
+          className={`flex items-center space-x-2 py-2 px-4 cursor-pointer hover:bg-blue-50 rounded border border-gray-200 shadow-sm bg-white
+            ${isMobile ? "w-full mt-2" : ""}`}
+          style={isMobile ? { marginLeft: `${level * 1.5}rem` } : {}}
           onClick={() => onExpand(user.referralCode)}
         >
           {loading === user.referralCode ? (
@@ -38,11 +41,12 @@ const TreeNode = ({
             </div>
           ) : (
             <div className="w-4">
-              {isExpanded ? (
-                <ChevronDown size={16} />
-              ) : (
-                <ChevronRight size={16} />
-              )}
+              {hasChildren &&
+                (isExpanded ? (
+                  <ChevronDown size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                ))}
             </div>
           )}
           <div className="flex items-center space-x-2">
@@ -56,9 +60,13 @@ const TreeNode = ({
 
       {/* Children container */}
       {isExpanded && hasChildren && (
-        <div className="relative mt-8 flex flex-row space-x-8">
-          {/* Horizontal line to children */}
-          {user.referrals.length > 1 && (
+        <div
+          className={`relative ${
+            isMobile ? "w-full" : "mt-8 flex flex-row space-x-8"
+          }`}
+        >
+          {/* Horizontal line to children - only show on desktop */}
+          {!isMobile && user.referrals.length > 1 && (
             <div
               className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 h-px bg-gray-300"
               style={{
@@ -75,6 +83,7 @@ const TreeNode = ({
               onExpand={onExpand}
               expandedNodes={expandedNodes}
               loading={loading}
+              isMobile={isMobile}
             />
           ))}
         </div>
@@ -88,8 +97,28 @@ const ReferralNetwork = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [expandedNodes, setExpandedNodes] = useState<any>([]);
   const [loadingNode, setLoadingNode] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      setIsSidebarOpen(!mobile);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, []);
   const navigate = useNavigate();
   const profileDetails = useSelector(
     (state: RootState) => state.AuthSlice.userDetails
@@ -171,36 +200,47 @@ const ReferralNetwork = () => {
 
   return (
     <div className="flex min-h-screen bg-blue-50">
-      <div className="fixed md:static z-50 inset-y-0 left-0 w-64 bg-white shadow-2xl transform transition-transform duration-300 md:translate-x-0">
-        {isSidebarOpen && (
-          <Sidebar
-            menuItems={menuItems}
-            profileDetails={profileDetails}
-            setIsSidebarOpen={setIsSidebarOpen}
-            handleLogout={handleLogout}
-          />
-        )}
-      </div>
+      {isSidebarOpen && (
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          menuItems={menuItems}
+          profileDetails={profileDetails}
+          setIsSidebarOpen={setIsSidebarOpen}
+          handleLogout={handleLogout}
+        />
+      )}
 
-      <div className="flex-grow p-6 overflow-y-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">
-            My Referral Network
-          </h1>
-          <p className="text-gray-500">View and explore your referral tree</p>
+      <div className="flex-grow p-4 md:p-6 overflow-y-auto">
+        <div className="p-4 md:hidden flex items-center justify-between">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 hover:bg-blue-100 rounded-lg"
+          >
+            <Menu size={24} />
+          </button>
+
+          <h1 className="text-xl font-bold"> My Referral Network</h1>
         </div>
 
         <div className="bg-white rounded-lg shadow-md">
-          <div className="p-6">
+          <div className="p-4 md:p-6">
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <BarLoader color="black" />
               </div>
             ) : referralTree.length > 0 ? (
-              <div className="mt-4 flex justify-center">
-                <div className="inline-flex flex-col items-center">
+              <div className={`mt-4 ${!isMobile && "flex justify-center"}`}>
+                <div
+                  className={`${
+                    isMobile ? "w-full" : "inline-flex flex-col items-center"
+                  }`}
+                >
                   {/* Root node (current user) */}
-                  <div className="mb-8 py-2 px-4 rounded border border-gray-200 shadow-sm bg-white">
+                  <div
+                    className={`${
+                      isMobile ? "w-full" : ""
+                    } mb-8 py-2 px-4 rounded border border-gray-200 shadow-sm bg-white`}
+                  >
                     <div className="flex items-center space-x-2">
                       <div className="p-1 rounded-full bg-blue-100">
                         <Users size={16} className="text-blue-600" />
@@ -210,21 +250,28 @@ const ReferralNetwork = () => {
                       </span>
                     </div>
                   </div>
-                  {/* Connecting line */}
-                  {referralTree.length > 0 && (
+                  {/* Connecting line - only show on desktop */}
+                  {!isMobile && referralTree.length > 0 && (
                     <div className="h-8 w-px bg-gray-300" />
                   )}
                   {/* First level referrals */}
-                  <div className="flex flex-row space-x-8">
-                    {referralTree.slice(0, 5).map((user: any) => (
-                      <TreeNode
-                        key={user.referralCode}
-                        user={user}
-                        onExpand={handleExpand}
-                        expandedNodes={expandedNodes}
-                        loading={loadingNode}
-                      />
-                    ))}
+                  <div
+                    className={`${
+                      isMobile ? "w-full" : "flex flex-row space-x-8"
+                    }`}
+                  >
+                    {referralTree
+                      .slice(0, isMobile ? undefined : 5)
+                      .map((user: any) => (
+                        <TreeNode
+                          key={user.referralCode}
+                          user={user}
+                          onExpand={handleExpand}
+                          expandedNodes={expandedNodes}
+                          loading={loadingNode}
+                          isMobile={isMobile}
+                        />
+                      ))}
                   </div>
                 </div>
               </div>

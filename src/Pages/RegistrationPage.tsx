@@ -13,6 +13,7 @@ import {
   CreditCard,
   Lock,
   Mail,
+  Menu,
   Phone,
   User,
 } from "lucide-react";
@@ -191,7 +192,14 @@ const RegistrationPage = () => {
       toast.error(error?.response?.data?.message);
     }
   };
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, []);
   const profileDetails = useSelector(
     (state: RootState) => state.AuthSlice.userDetails
   );
@@ -203,187 +211,197 @@ const RegistrationPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div
-        className={`
-      fixed md:static z-50 inset-y-0 left-0 
-      w-64 bg-white shadow-2xl 
-      transform transition-transform duration-300
-      md:translate-x-0
-    `}
-      >
-        {isSidebarOpen && (
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      {isSidebarOpen && (
+        <div className="w-full md:w-64">
           <Sidebar
+            isSidebarOpen={isSidebarOpen}
             menuItems={menuItems}
             profileDetails={profileDetails}
             setIsSidebarOpen={setIsSidebarOpen}
             handleLogout={handleLogout}
           />
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="flex-grow flex items-center justify-center p-8">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8 transition-all duration-300">
-          <StepIndicator
-            currentStep={step}
-            steps={["Referral", "Verify", "Register"]}
-          />
+      <div className="flex-1">
+        {/* Mobile Header */}
+        <div className="p-4 md:hidden flex items-center justify-between">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="p-2 hover:bg-blue-100 rounded-lg"
+          >
+            <Menu size={24} />
+          </button>
+          <h1 className="text-xl font-bold">Registration Page</h1>
+          <div className="w-8"></div> {/* Spacer for center alignment */}
+        </div>
+        <div className="flex-grow flex items-center justify-center p-4 md:p-8">
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-4 md:p-8 transition-all duration-300">
+            <StepIndicator
+              currentStep={step}
+              steps={["Referral", "Verify", "Register"]}
+            />
 
-          {step === 1 && (
-            <div className="space-y-6 transition-all duration-300">
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Enter Referral ID
-                </h2>
-                <p className="text-gray-500 mb-6">
-                  Please enter your referral code to continue
-                </p>
-              </div>
-              <InputField
-                icon={CreditCard}
-                type="text"
-                placeholder="Enter Referral ID"
-                value={referralId}
-                onChange={(e: any) => setReferralId(e.target.value)}
-                error={errors.referralId}
-              />
-              <button
-                onClick={handleReferralSubmit}
-                disabled={isLoading}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                {isLoading ? (
-                  <BarLoader color="#ffffff" />
-                ) : (
-                  <>
-                    <span>Continue</span>
-                    <ChevronRight size={18} />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-
-          {step === 2 && referrerDetails && (
-            <div className="text-center space-y-6 transition-all duration-300">
-              <div className="p-6 bg-blue-50 rounded-lg">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">
-                  Referrer Details
-                </h2>
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                  <User size={32} className="text-blue-500" />
+            {step === 1 && (
+              <div className="space-y-4 md:space-y-6 transition-all duration-300">
+                <div className="text-center">
+                  <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
+                    Enter Referral ID
+                  </h2>
+                  <p className="text-sm md:text-base text-gray-500 mb-4 md:mb-6">
+                    Please enter your referral code to continue
+                  </p>
                 </div>
-                <p className="text-lg font-medium text-gray-700">
-                  {referrerDetails.name}
-                </p>
-              </div>
-              <button
-                onClick={() => setStep(3)}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <span>Continue to Registration</span>
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          )}
-
-          {step === 3 && (
-            <div className="space-y-4 transition-all duration-300">
-              <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
-                Complete Registration
-              </h2>
-
-              <InputField
-                icon={User}
-                type="text"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={(e: any) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                error={errors.name}
-              />
-
-              <InputField
-                icon={Phone}
-                type="tel"
-                placeholder="Mobile Number"
-                value={formData.mobileNumber}
-                onChange={(e: any) =>
-                  setFormData({ ...formData, mobileNumber: e.target.value })
-                }
-                error={errors.mobileNumber}
-              />
-
-              <InputField
-                icon={Mail}
-                type="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={(e: any) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                error={errors.email}
-              />
-
-              <InputField
-                icon={Lock}
-                type="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e: any) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                error={errors.password}
-              />
-
-              <InputField
-                icon={Lock}
-                type="password"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={(e: any) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
-                error={errors.confirmPassword}
-              />
-
-              <div className="relative">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                  <CreditCard size={18} />
-                </div>
-                <select
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 appearance-none"
+                <InputField
+                  icon={CreditCard}
+                  type="text"
+                  placeholder="Enter Referral ID"
+                  value={referralId}
+                  onChange={(e: any) => setReferralId(e.target.value)}
+                  error={errors.referralId}
+                />
+                <button
+                  onClick={handleReferralSubmit}
+                  disabled={isLoading}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 md:py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
                 >
-                  <option value="" disabled>
-                    Select PIN
-                  </option>
-                  {pins.map((pin: any) => (
-                    <option key={pin._id} value={pin.pinCode}>
-                      {pin.pinCode}
-                    </option>
-                  ))}
-                </select>
+                  {isLoading ? (
+                    <BarLoader color="#ffffff" />
+                  ) : (
+                    <>
+                      <span>Continue</span>
+                      <ChevronRight size={18} />
+                    </>
+                  )}
+                </button>
               </div>
+            )}
 
-              <button
-                onClick={handleRegistrationSubmit}
-                disabled={isLoading}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 mt-6"
-              >
-                {isLoading ? (
-                  <BarLoader color="#ffffff" />
-                ) : (
-                  <>
-                    <span>Complete Registration</span>
-                    <ChevronRight size={18} />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+            {step === 2 && referrerDetails && (
+              <div className="text-center space-y-4 md:space-y-6 transition-all duration-300">
+                <div className="p-4 md:p-6 bg-blue-50 rounded-lg">
+                  <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-4">
+                    Referrer Details
+                  </h2>
+                  <div className="inline-flex items-center justify-center w-12 h-12 md:w-16 md:h-16 bg-blue-100 rounded-full mb-4">
+                    <User size={24} className="text-blue-500" />
+                  </div>
+                  <p className="text-base md:text-lg font-medium text-gray-700">
+                    {referrerDetails.name}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setStep(3)}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 md:py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+                >
+                  <span>Continue to Registration</span>
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+            )}
+
+            {step === 3 && (
+              <div className="space-y-3 md:space-y-4 transition-all duration-300">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800 text-center mb-4 md:mb-6">
+                  Complete Registration
+                </h2>
+
+                <InputField
+                  icon={User}
+                  type="text"
+                  placeholder="Full Name"
+                  value={formData.name}
+                  onChange={(e: any) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  error={errors.name}
+                />
+
+                <InputField
+                  icon={Phone}
+                  type="tel"
+                  placeholder="Mobile Number"
+                  value={formData.mobileNumber}
+                  onChange={(e: any) =>
+                    setFormData({ ...formData, mobileNumber: e.target.value })
+                  }
+                  error={errors.mobileNumber}
+                />
+
+                <InputField
+                  icon={Mail}
+                  type="email"
+                  placeholder="Email Address"
+                  value={formData.email}
+                  onChange={(e: any) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                  error={errors.email}
+                />
+
+                <InputField
+                  icon={Lock}
+                  type="password"
+                  placeholder="Password"
+                  value={formData.password}
+                  onChange={(e: any) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  error={errors.password}
+                />
+
+                <InputField
+                  icon={Lock}
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={formData.confirmPassword}
+                  onChange={(e: any) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  error={errors.confirmPassword}
+                />
+
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                    <CreditCard size={18} />
+                  </div>
+                  <select
+                    value={pin}
+                    onChange={(e) => setPin(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 md:py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 appearance-none"
+                  >
+                    <option value="" disabled>
+                      Select PIN
+                    </option>
+                    {pins.map((pin: any) => (
+                      <option key={pin._id} value={pin.pinCode}>
+                        {pin.pinCode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  onClick={handleRegistrationSubmit}
+                  disabled={isLoading}
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2.5 md:py-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 mt-4 md:mt-6"
+                >
+                  {isLoading ? (
+                    <BarLoader color="#ffffff" />
+                  ) : (
+                    <>
+                      <span>Complete Registration</span>
+                      <ChevronRight size={18} />
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

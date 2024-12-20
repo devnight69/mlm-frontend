@@ -93,9 +93,18 @@ const Dashboard = () => {
     navigate("/login");
   };
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [adminProfileDetails, setAdminProfileDetails] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      setIsSidebarOpen(false);
+    } else {
+      setIsSidebarOpen(true);
+    }
+  }, []);
+
   const getUserProfile = async () => {
     setIsLoading(true);
     try {
@@ -125,24 +134,15 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen bg-blue-50">
-      <div
-        className={`
-        fixed md:static z-50 inset-y-0 left-0 
-        w-64 bg-white shadow-2xl 
-        transform transition-transform duration-300
-        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
-        md:translate-x-0
-      `}
-      >
-        {isSidebarOpen && (
-          <Sidebar
-            menuItems={menuItems}
-            profileDetails={profileDetails}
-            setIsSidebarOpen={setIsSidebarOpen}
-            handleLogout={handleLogout}
-          />
-        )}
-      </div>
+      {isSidebarOpen && (
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          menuItems={menuItems}
+          profileDetails={profileDetails}
+          setIsSidebarOpen={setIsSidebarOpen}
+          handleLogout={handleLogout}
+        />
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center h-screen w-screen">

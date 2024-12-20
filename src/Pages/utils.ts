@@ -38,7 +38,7 @@ export const menuItems = [
   },
   {
     icon: CreditCard,
-    label: "Withdrawl Requests",
+    label: "Withdraw Requests",
     route: "/withdraw-requests",
   },
   {
