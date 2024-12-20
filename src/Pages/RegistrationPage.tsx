@@ -183,7 +183,7 @@ const RegistrationPage = () => {
         }
       );
       const availablePins = response.data.data.pins.filter(
-        (pin: any) => pin.status === "available"
+        (pin: any) => pin.status === "available" || pin.status === "transferred"
       );
       setPins(availablePins);
     } catch (error: any) {
