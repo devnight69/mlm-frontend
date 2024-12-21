@@ -35,7 +35,8 @@ const Sidebar = ({
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target as Node) &&
         isSidebarOpen &&
-        setIsSidebarOpen
+        setIsSidebarOpen &&
+        window.innerWidth < 768
       ) {
         setIsSidebarOpen(false);
       }
