@@ -244,6 +244,12 @@ const PinManagement = () => {
                                 Pin Code
                               </th>
                               <th className="px-3 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Pin Type
+                              </th>
+                              <th className="px-3 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Cashback
+                              </th>
+                              <th className="px-3 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Status
                               </th>
                               <th className="hidden md:table-cell px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -264,7 +270,13 @@ const PinManagement = () => {
                                   {pin.pinCode}
                                 </td>
                                 <td className="px-3 py-2 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-900">
-                                  {pin.status}
+                                  {pin.pinCode}
+                                </td>
+                                <td className="px-3 py-2 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {pin.type}
+                                </td>
+                                <td className="px-3 py-2 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-900">
+                                  {pin.cashback}
                                 </td>
                                 <td className="hidden md:table-cell px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                   {new Date(
@@ -319,7 +331,7 @@ const PinManagement = () => {
                         Select Package
                       </h4>
                       {packages.length === 0 ? (
-                        <p className="text-gray-500">Loading packages...</p>
+                        <p className="text-gray-500">No Packages Found.</p>
                       ) : (
                         <div className="space-y-2 max-h-64 overflow-y-auto">
                           {packages.map((pkg: any) => (
@@ -327,21 +339,23 @@ const PinManagement = () => {
                               key={pkg.id}
                               onClick={() => setSelectedPackage(pkg)}
                               className={`border p-3 rounded cursor-pointer transition-all
-                            ${
-                              selectedPackage?.id === pkg.id
-                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-300"
-                                : "border-gray-300 hover:bg-gray-100"
-                            }`}
+                  ${
+                    selectedPackage?.id === pkg.id
+                      ? "border-blue-500 bg-blue-50 ring-2 ring-blue-300"
+                      : "border-gray-300 hover:bg-gray-100"
+                  }`}
                             >
                               <div className="flex justify-between items-center">
-                                <div>
+                                <div className="space-y-1">
                                   <p className="font-semibold">
                                     {pkg.productName}
                                   </p>
-                                  <p className="text-sm text-gray-600">
-                                    Price: ₹{pkg.productPrice} | Direct Income:{" "}
-                                    {pkg.directIncome}
-                                  </p>
+                                  <div className="grid grid-cols-2 gap-x-4 text-sm text-gray-600">
+                                    <p>Price: ₹{pkg.productPrice}</p>
+                                    <p>Direct Income: {pkg.directIncome}</p>
+                                    <p>Type: {pkg.type}</p>
+                                    <p>Cashback: {pkg.cashback}</p>
+                                  </div>
                                 </div>
                                 {selectedPackage?.id === pkg.id && (
                                   <svg

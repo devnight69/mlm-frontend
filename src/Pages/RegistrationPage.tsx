@@ -379,7 +379,7 @@ const RegistrationPage = () => {
                     </option>
                     {pins.map((pin: any) => (
                       <option key={pin._id} value={pin.pinCode}>
-                        {pin.pinCode}
+                        {pin.type} - {pin.pinCode}
                       </option>
                     ))}
                   </select>
